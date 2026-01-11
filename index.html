@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emote Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #1a1a2e;
+            color: #e6e6e6;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #4cc9f0;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a9a9b8;
+            margin-bottom: 20px;
+        }
+        
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+        
+        #searchInput {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 50px;
+            background-color: #0f3460;
+            color: white;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        #searchInput:focus {
+            outline: none;
+            background-color: #13315c;
+            box-shadow: 0 4px 12px rgba(76, 201, 240, 0.3);
+        }
+        
+        #searchInput::placeholder {
+            color: #a9a9b8;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            background-color: #0f3460;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-btn:hover {
+            background-color: #13315c;
+            transform: translateY(-2px);
+        }
+        
+        .filter-btn.active {
+            background-color: #4cc9f0;
+            color: #0a1931;
+        }
+        
+        .emote-count {
+            font-size: 1.1rem;
+            color: #a9a9b8;
+            background-color: #0f3460;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+        
+        .emote-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .emote-card {
+            background-color: #16213e;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .emote-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+        
+        .emote-image-container {
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #0f3460;
+            padding: 15px;
+        }
+        
+        .emote-image {
+            max-width: 100%;
+            max-height: 130px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        
+        .emote-card:hover .emote-image {
+            transform: scale(1.05);
+        }
+        
+        .emote-info {
+            padding: 18px;
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .emote-code {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #4cc9f0;
+            margin-bottom: 12px;
+            word-break: break-all;
+        }
+        
+        .emote-index {
+            font-size: 0.9rem;
+            color: #a9a9b8;
+            margin-bottom: 15px;
+        }
+        
+        .copy-btn {
+            background-color: #4cc9f0;
+            color: #0a1931;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+        
+        .copy-btn:hover {
+            background-color: #3db8dd;
+            transform: translateY(-2px);
+        }
+        
+        .copy-btn.copied {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.4s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            grid-column: 1 / -1;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #4cc9f0;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #4cc9f0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            grid-column: 1 / -1;
+        }
+        
+        .loading i {
+            font-size: 3rem;
+            color: #4cc9f0;
+            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #a9a9b8;
+            border-top: 1px solid #0f3460;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .emote-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 20px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .emote-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .emote-code {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Free fire Emote Gallery</h1>
+            <p class="subtitle">Browse and copy emote codes from the collection</p>
+            
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search emote codes (e.g., 909000, 909042...)" disabled>
+            </div>
+        </header>
+        
+        <div class="controls">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all" disabled>
+                    <i class="fas fa-th-large"></i> All Emotes
+                </button>
+                <button class="filter-btn" data-filter="909000" disabled>
+                    <i class="fas fa-smile"></i> 909000 Series
+                </button>
+                <button class="filter-btn" data-filter="909033" disabled>
+                    <i class="fas fa-star"></i> 909033 Series
+                </button>
+                <button class="filter-btn" data-filter="909034" disabled>
+                    <i class="fas fa-moon"></i> 909034 Series
+                </button>
+                <button class="filter-btn" data-filter="909035" disabled>
+                    <i class="fas fa-sun"></i> 909035 Series
+                </button>
+                <button class="filter-btn" data-filter="909036" disabled>
+                    <i class="fas fa-heart"></i> 909036 Series
+                </button>
+            </div>
+            
+            <div class="emote-count">
+                Loading emotes...
+            </div>
+        </div>
+        
+        <div class="emote-grid" id="emoteGrid">
+            <div class="loading">
+                <i class="fas fa-spinner"></i>
+                <h3>Loading emote data...</h3>
+                <p>Please wait while we load the emote collection</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Free fire Emote Gallery &copy; <span id="currentYear"></span> | Total: <span id="totalEmotes">0</span> emotes</p>
+            <p>Designed by <a href="https://www.facebook.com/sijan.mahmud.74" target="_blank">Sijan Mahmud</a></p>
+            
+        </footer>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i> Emote code copied to clipboard!
+    </div>
+
+    <script>
+        // DOM elements
+        const emoteGrid = document.getElementById('emoteGrid');
+        const searchInput = document.getElementById('searchInput');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const emoteCount = document.querySelector('.emote-count');
+        const totalEmotes = document.getElementById('totalEmotes');
+        const notification = document.getElementById('notification');
+        const currentYear = document.getElementById('currentYear');
+        
+        // State variables
+        let emotes = [];
+        let currentFilter = 'all';
+        let currentSearch = '';
+        
+        // Initialize the page
+        async function init() {
+            // Set current year in footer
+            currentYear.textContent = new Date().getFullYear();
+            
+            try {
+                // Load emote data from external JSON file
+                await loadEmoteData();
+                
+                // Enable UI elements
+                enableUI();
+                
+                // Render all emotes initially
+                renderEmotes();
+                
+                // Add event listeners
+                searchInput.addEventListener('input', handleSearch);
+                filterButtons.forEach(button => {
+                    button.addEventListener('click', handleFilter);
+                });
+            } catch (error) {
+                showError('Failed to load emote data. Please check if emotefy_images.json exists.');
+                console.error('Error loading emote data:', error);
+            }
+        }
+        
+        // Load emote data from JSON file
+        async function loadEmoteData() {
+            try {
+                const response = await fetch('emotefy_images.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                emotes = await response.json();
+                totalEmotes.textContent = emotes.length;
+            } catch (error) {
+                throw new Error('Failed to load JSON file: ' + error.message);
+            }
+        }
+        
+        // Enable UI elements after data is loaded
+        function enableUI() {
+            searchInput.disabled = false;
+            searchInput.placeholder = "Search emote codes (e.g., 909000, 909042...)";
+            
+            filterButtons.forEach(button => {
+                button.disabled = false;
+            });
+        }
+        
+        // Render emotes based on current filter and search
+        function renderEmotes() {
+            // Clear the grid
+            emoteGrid.innerHTML = '';
+            
+            // Filter emotes based on search and filter
+            const filteredEmotes = emotes.filter(emote => {
+                const matchesSearch = emote.alt.toLowerCase().includes(currentSearch.toLowerCase()) ||
+                                     emote.index.toString().includes(currentSearch);
+                
+                const matchesFilter = currentFilter === 'all' || emote.alt.startsWith(currentFilter);
+                
+                return matchesSearch && matchesFilter;
+            });
+            
+            // Update emote count
+            emoteCount.innerHTML = `Showing <span id="displayedCount">${filteredEmotes.length}</span> of <span id="totalCount">${emotes.length}</span> emotes`;
+            
+            // If no emotes found, show empty state
+            if (filteredEmotes.length === 0) {
+                emoteGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-frown"></i>
+                        <h3>No emotes found</h3>
+                        <p>Try adjusting your search or filter criteria</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Create emote cards
+            filteredEmotes.forEach(emote => {
+                const emoteCard = document.createElement('div');
+                emoteCard.className = 'emote-card';
+                emoteCard.innerHTML = `
+                    <div class="emote-image-container">
+                        <img src="${emote.src}" alt="${emote.alt}" class="emote-image" loading="lazy">
+                    </div>
+                    <div class="emote-info">
+                        <div>
+                            <div class="emote-code">${emote.alt}</div>
+                            <div class="emote-index">Index: ${emote.index}</div>
+                        </div>
+                        <button class="copy-btn" data-code="${emote.alt}">
+                            <i class="far fa-copy"></i> Copy Code
+                        </button>
+                    </div>
+                `;
+                
+                emoteGrid.appendChild(emoteCard);
+            });
+            
+            // Add event listeners to copy buttons
+            document.querySelectorAll('.copy-btn').forEach(button => {
+                button.addEventListener('click', handleCopy);
+            });
+        }
+        
+        // Handle search input
+        function handleSearch(e) {
+            currentSearch = e.target.value;
+            renderEmotes();
+        }
+        
+        // Handle filter button clicks
+        function handleFilter(e) {
+            const filter = e.target.dataset.filter;
+            
+            // Update active button
+            filterButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+            e.target.classList.add('active');
+            
+            // Update filter and re-render
+            currentFilter = filter;
+            renderEmotes();
+        }
+        
+        // Handle copy button clicks
+        function handleCopy(e) {
+            const code = e.target.dataset.code || 
+                        e.target.closest('.copy-btn').dataset.code;
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(code)
+                .then(() => {
+                    // Show notification
+                    notification.classList.add('show');
+                    
+                    // Change button text temporarily
+                    const button = e.target.tagName === 'BUTTON' ? e.target : e.target.closest('.copy-btn');
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    button.classList.add('copied');
+                    
+                    // Reset button after 2 seconds
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.classList.remove('copied');
+                    }, 2000);
+                    
+                    // Hide notification after 3 seconds
+                    setTimeout(() => {
+                        notification.classList.remove('show');
+                    }, 3000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                    alert('Failed to copy code to clipboard. Please try again.');
+                });
+        }
+        
+        // Show error message
+        function showError(message) {
+            emoteGrid.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Error Loading Data</h3>
+                    <p>${message}</p>
+                    <p style="margin-top: 20px;">Make sure the file "emotefy_images.json" is in the same folder as this HTML file.</p>
+                </div>
+            `;
+        }
+        
+        // Initialize the page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
